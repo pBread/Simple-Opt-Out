@@ -12,6 +12,7 @@ import (
 	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
+// payload received by the inbound SMS webook
 type SMSEvent struct {
 	APIVersion    string `json:"ApiVersion"`
 	SMSSid        string `json:"SmsSid"`
