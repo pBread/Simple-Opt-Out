@@ -47,8 +47,9 @@ func main() {
 }
 
 func handleNew(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query()
-	sendSms(q.Get("to"), "initial")
+	to := r.URL.Query().Get("to")
+	sendSms(to, "initial")
+	w.Write([]byte("Sent opt out message to" + to))
 }
 
 func handleReply(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +59,6 @@ func handleReply(w http.ResponseWriter, r *http.Request) {
 	if err := schema.NewDecoder().Decode(&ev, r.Form); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatal(err)
-		return
 	}
 
 	if hasKeywords(ev.Body) {
