@@ -3,9 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 
 	"github.com/gorilla/schema"
+	"github.com/joho/godotenv"
+	twilio "github.com/twilio/twilio-go"
+	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
 type SMSEvent struct {
@@ -30,19 +34,28 @@ type SMSEvent struct {
 	FromState     string `json:"FromState"`
 }
 
+var client *twilio.RestClient
+
 func main() {
-	http.HandleFunc("/handler", handler)
+	godotenv.Load(".env")
+	creds := twilio.RestClientParams{Username: os.Getenv("ACCOUNT_SID"), Password: os.Getenv("AUTH_TOKEN")}
+	client = twilio.NewRestClientWithParams(creds)
+
+	http.HandleFunc("/opt-out/new", handleNew)
+	http.HandleFunc("/opt-out/reply", handleReply)
 	http.ListenAndServe(":8080", nil)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	var decoder = schema.NewDecoder()
-	var ev SMSEvent
+func handleNew(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	sendSms(q.Get("to"), "initial")
+}
 
+func handleReply(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	err := decoder.Decode(&ev, r.Form)
-	if err != nil {
+	var ev SMSEvent
+	if err := schema.NewDecoder().Decode(&ev, r.Form); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Fatal(err)
 		return
@@ -50,22 +63,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if hasKeywords(ev.Body) {
 		unsubscribe(ev)
+		sendSms(ev.From, "unsubscribe")
 		log.Println("User opted out")
-
 	} else {
+		sendSms(ev.From, "mistake")
 		log.Println("User did not opt out")
-
 	}
-
 }
 
 func hasKeywords(body string) bool {
-	// do not use STOP or UNSUBSCRIBE
+	// do not use these keywords: https://bit.ly/3m33u6I
 	matched, _ := regexp.Match(`(?i)tester`, []byte(body))
 	return matched
 }
 
 func unsubscribe(ev SMSEvent) {
-	// update neighbors database to flag phone number invalid
+	// update database to flag post as invalid
+}
 
+func sendSms(to string, message string) {
+	var body string
+	switch message {
+	case "initial":
+		body = "Hello, your post was successful \n\n If this is a mistake, respond TESTER"
+	case "mistake":
+		body = "I did not understand your response. If you did not post a, respond TESTER."
+	case "unsubscribe":
+		body = "You have been unsubscribed."
+	}
+
+	params := &openapi.CreateMessageParams{}
+	params.SetTo(to)
+	params.SetFrom(os.Getenv("OPT_OUT_PHONE"))
+	params.SetBody(body)
+
+	if _, err := client.ApiV2010.CreateMessage(params); err != nil {
+		log.Println(err.Error())
+	} else {
+		log.Println("SMS sent successfully!")
+	}
 }
