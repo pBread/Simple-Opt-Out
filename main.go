@@ -14,25 +14,25 @@ import (
 
 // payload received by the inbound SMS webook
 type SMSEvent struct {
+	AccountSid    string `json:"AccountSid"`
 	APIVersion    string `json:"ApiVersion"`
+	Body          string `json:"Body"`
+	From          string `json:"From"`
+	FromCity      string `json:"FromCity"`
+	FromCountry   string `json:"FromCountry"`
+	FromState     string `json:"FromState"`
+	FromZip       string `json:"FromZip"`
+	MessageSid    string `json:"MessageSid"`
+	NumMedia      string `json:"NumMedia"`
+	NumSegments   string `json:"NumSegments"`
+	SMSMessageSid string `json:"SmsMessageSid"`
 	SMSSid        string `json:"SmsSid"`
 	SMSStatus     string `json:"SmsStatus"`
-	SMSMessageSid string `json:"SmsMessageSid"`
-	NumSegments   string `json:"NumSegments"`
-	ToState       string `json:"ToState"`
-	From          string `json:"From"`
-	MessageSid    string `json:"MessageSid"`
-	AccountSid    string `json:"AccountSid"`
-	ToCity        string `json:"ToCity"`
-	FromCountry   string `json:"FromCountry"`
-	ToZip         string `json:"ToZip"`
-	FromCity      string `json:"FromCity"`
 	To            string `json:"To"`
-	FromZip       string `json:"FromZip"`
+	ToCity        string `json:"ToCity"`
 	ToCountry     string `json:"ToCountry"`
-	Body          string `json:"Body"`
-	NumMedia      string `json:"NumMedia"`
-	FromState     string `json:"FromState"`
+	ToState       string `json:"ToState"`
+	ToZip         string `json:"ToZip"`
 }
 
 var client *twilio.RestClient
