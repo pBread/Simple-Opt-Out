@@ -45,4 +45,4 @@ Initiate the verification process by going to `http://localhost:8080/opt-out/new
 
 Reply to the text message with and w/out the keyword `TESTER` to see what happens.
 
-NOTE: This example does not unsubscribe you when you respond with the keyword. You would have to update [func unsubscribe](./main.go#L81) with the necessary logic to remove the post.
+NOTE: This example does not unsubscribe you when you respond with the keyword. You need to update [func unsubscribe](./main.go#L81) with the necessary logic to disable the user/post in your database.
