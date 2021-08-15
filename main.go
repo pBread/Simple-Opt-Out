@@ -88,7 +88,7 @@ func sendSms(to string, message string) {
 	case "initial":
 		body = "Hello, your post was successful \n\nIf this is a mistake, respond TESTER"
 	case "mistake":
-		body = "I did not understand your response. If you did not post a, respond TESTER."
+		body = "I did not understand your response. If you did not post, respond TESTER."
 	case "unsubscribe":
 		body = "You have been unsubscribed."
 	}
